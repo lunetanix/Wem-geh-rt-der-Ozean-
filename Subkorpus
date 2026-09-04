@@ -1,0 +1,34 @@
+install.packages("RKorAPClient")
+install.packages("knitr")
+install.packages("dplyr")
+library(RKorAPClient)
+library(knitr)
+library(dplyr)
+
+result_krimi <- KorAPConnection(
+  KorAPUrl = "https://korap.dnb.de/",
+  verbose = TRUE
+) |>
+  auth() |>
+  collocationAnalysis(
+    node = "[tt/l=Ozean]",
+    vc = "textType=/.*Krimi.*/",
+    leftContextSize = 1,
+    rightContextSize = 0,
+    searchHitsSampleLimit = 1000,
+    topCollocatesLimit = 20
+  )
+
+tabelle_krimi <- result_krimi |>
+  mutate(Kollokation = sprintf("%s Ozean", collocate)) |>
+  select(Kollokation, logDice, pmi, ll) |>
+  head(15)
+
+tabelle_krimi |>
+  kable(
+    format = "pipe",
+    digits = 2,
+    col.names = c("Kollokation", "logDice", "PMI", "LL")
+  )
+
+View(tabelle_krimi)
