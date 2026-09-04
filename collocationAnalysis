@@ -1,0 +1,21 @@
+install.packages("RKorAPClient")
+install.packages("knitr")
+library(RKorAPClient)
+library(knitr)
+
+result <- KorAPConnection(KorAPUrl = "https://korap.dnb.de/", verbose = TRUE) |> auth() |>
+  collocationAnalysis(
+    "focus({[tt/l=Ozean]})",
+    leftContextSize = 1,
+    rightContextSize = 0,
+    exactFrequencies = TRUE,
+    searchHitsSampleLimit = 1000,
+    topCollocatesLimit = 20
+  ) |>
+  mutate(LVC = sprintf("%s Ozean", collocate)) |>
+  select(LVC, logDice, pmi, ll) |>
+  head(15) |>
+  kable(format="pipe", digits=2)
+
+result
+View(result)
